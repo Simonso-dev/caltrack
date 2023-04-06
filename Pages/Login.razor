@@ -1,0 +1,47 @@
+@layout LoginAndRegisterLayout 
+@page "/login"
+@using caltrack.Authentication;
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+
+<PageTitle>Login</PageTitle>
+
+<h3>Login</h3>
+
+    @if(error) {
+        <div class="alert alert-danger text-center" role="alert">@errorMsg</div>
+    }
+
+    <EditForm Model="loginUser" OnSubmit="HandleLoginSubmit" class="mb-4">
+        <label for="username" class="form-label">Username</label>
+        <InputText placeholder="Username" id="username" @bind-Value="loginUser.Username" class="mb-2 form-control"/>
+        <label for="password" class="form-label">Password</label>
+        <InputText placeholder="Password" type="password" @bind-Value="loginUser.Password" id="password" class="form-control mb-3"/>
+        <button type="submit" class="btn btn-primary w-100">Login</button> <p class="text-center mt-4">Not registerd? <a href="/register">Register</a></p>
+    </EditForm>
+
+
+@code {
+    private User loginUser = new();
+    private string? errorMsg;
+    private bool error;
+    private bool hashMatch;
+
+    private async Task HandleLoginSubmit() {
+        var userAccount = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{loginUser.Username}");
+        hashMatch = BCrypt.Verify(loginUser.Password, userAccount.Password);
+        if(userAccount == null || hashMatch == false) {
+            errorMsg = "Wrong username or password!";
+            error = true;
+            return;
+        }
+
+        var customAuthStateProvider = (CustomAuthStateProvider)AuthStateProvider;
+        await customAuthStateProvider.UpdateAuthenticationState(new UserSession {
+            Username = userAccount.Username,
+            Role = userAccount.Role
+        });
+        NavigationManager.NavigateTo("/", true);
+    }
+}

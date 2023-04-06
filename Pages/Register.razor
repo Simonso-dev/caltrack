@@ -1,0 +1,58 @@
+@layout LoginAndRegisterLayout
+@page "/register"
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+
+<PageTitle>Register</PageTitle>
+
+<h3>Register</h3>
+
+    @if(error) {
+        <div class="alert alert-danger text-center" role="alert">@errorMsg</div>
+    }
+
+    <EditForm Model="registerUser" OnSubmit="HandleRegisterSubmit" class="mb-4">
+        <label for="username" class="form-label">Username</label>
+        <InputText placeholder="Username" id="username" @bind-Value="registerUser.Username" class="mb-2 form-control"/>
+        <label for="password" class="form-label">Password</label>
+        <InputText placeholder="Password" type="password" @bind-Value="registerUser.Password" id="password" class="form-control mb-3"/>
+        <label for="confirmedPassword" class="form-label">Confirmed password</label>
+        <InputText placeholder="Confirmed password" type="password" @bind-Value="confirmPassword" id="confirmedPassword" class="form-control mb-3"/>
+        <button type="submit" class="btn btn-primary w-100">Register</button><p class="text-center mt-4"> Registerd? <a href="/login">Login</a></p>
+    </EditForm>
+
+@code {
+    private User registerUser = new();
+    private string? errorMsg;
+    private bool error;
+    private string? confirmPassword;
+
+    private async Task HandleRegisterSubmit() {
+        try {
+            // var user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{registerUser.Username}");
+            if(!registerUser.Password.Equals(confirmPassword)) {
+                errorMsg = "Password doesn't match confirmed password";
+                error = true;
+            }
+            /* else if(registerUser.Username.Equals(user.Username)) {
+                errorMsg = "This username is already taken";
+                error = true;
+            } */
+            else {
+                registerUser.Role = "User";
+                var response = await HttpClient.PostAsJsonAsync($"{NavigationManager.BaseUri}users", registerUser);
+
+                var customAuthStateProvider = (CustomAuthStateProvider)AuthStateProvider;
+                await customAuthStateProvider.UpdateAuthenticationState(new UserSession {
+                    Username = registerUser.Username,
+                    Role = registerUser.Role
+                });
+                NavigationManager.NavigateTo("/", true);
+            }
+        }
+        catch(Exception ex) {
+            ex.GetBaseException();
+        }
+    }
+}

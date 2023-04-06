@@ -1,0 +1,15 @@
+﻿<CascadingAuthenticationState>
+<Router AppAssembly="@typeof(App).Assembly">
+    <Found Context="routeData">
+        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <img src="https://http.cat/404" alt="Cat not found" class="img-fluid">
+                <h3 role="alert"><i>This is not the page you're looking for . . .</i></h3>
+        </LayoutView>
+    </NotFound>
+</Router>
+</CascadingAuthenticationState>

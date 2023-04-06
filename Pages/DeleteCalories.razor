@@ -1,0 +1,49 @@
+@page "/delete"
+@page "/delete/{caloriesId:int}"
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+
+    <PageTitle>Delete Calories entry</PageTitle>
+    <h3>Delete Calories entry (@calories.CaloriesId)</h3>
+    <h5 class="mb-4">Are you sure you want to delete this entry?</h5>
+
+    <table width="40%" class="mb-2">
+        <tr><th>Calories</th><td>@calories.Calories</td></tr>
+        <tr><th>Date</th><td>@calories.Date.ToString("dd.MM.yyyy")</td></tr>
+    </table>
+
+    <button @onclick="deleteCalories" class="btn btn-danger">Delete</button> | <a href="/">Go home</a>
+
+
+
+@code {
+    [Parameter]
+    public int caloriesId { get; set;}
+
+    private CaloriesModel? calories = new();
+
+    private async Task deleteCalories() {
+            await HttpClient.DeleteFromJsonAsync<CaloriesModel>(NavigationManager.BaseUri + $"calories/{caloriesId}");
+            NavigationManager.NavigateTo("/");
+    }
+
+    protected override async Task OnParametersSetAsync() {
+        // if(caloriesId != null) {
+        try {
+            var result = await HttpClient.GetFromJsonAsync<CaloriesModel>(NavigationManager.BaseUri + $"calories/{caloriesId}");
+            if(result != null) {
+                calories = result;
+            }
+            else {
+                NavigationManager.NavigateTo("/add");
+            }
+        }
+        catch(Exception ex) {
+            ex.GetBaseException();
+        }
+        // }
+    }
+}
+
+
+

@@ -1,0 +1,34 @@
+@page "/user"
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+
+
+<AuthorizeView>
+    <Authorized>
+        <h3>Hello, @context.User.Identity.Name</h3>
+        <h5 class="mb-4">Here you can see your user information</h5>
+        <table width="40%" class="mb-2">
+            <tr><th>Username</th><td>@user.Username</td></tr>
+            <tr><th>Role</th><td>@user.Role</td></tr>
+        </table>
+    </Authorized>
+    <NotAuthorized>
+        <p>Please <a href="/login">Login</a> or <a href="/register">Register</a> to track caloric intake!</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+        private User? user = new();
+
+        protected override async Task OnInitializedAsync() {
+            try {
+                var authState = (CustomAuthStateProvider)AuthStateProvider;
+                var authUser = await authState.GetAuthenticationStateAsync();
+                user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{authUser.User.Identity.Name}");
+            }
+            catch(Exception ex) {
+                ex.GetBaseException();
+            }
+        }
+}

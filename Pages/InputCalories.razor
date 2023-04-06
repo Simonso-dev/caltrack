@@ -1,0 +1,47 @@
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+
+@if(error) {
+    <div class="alert alert-danger" role="alert">@errorMsg</div>
+}
+
+<EditForm Model="caloriesItem" OnValidSubmit="addCalories" class="row g-2">
+    <div class="col-auto">
+        <InputNumber placeholder="Calories amount" @bind-Value="caloriesItem.Calories" class="form-control"/>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Add Calories</button>
+    </div>
+</EditForm>
+
+@code {
+    private bool error = false;
+    private string? errorMsg;
+    private DateTime date = DateTime.Today;
+    private CaloriesModel caloriesItem = new();
+    
+    private async Task addCalories() {
+        if(caloriesItem.Calories < 1200) {
+            error = true; 
+            errorMsg = "Calories can't be less than 1200 calories!";
+        } 
+        else {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{authState.User.Identity.Name}");
+            
+            caloriesItem.Date = date;
+            caloriesItem.UserId = user.UserId;
+
+            try{ 
+                var response = await HttpClient.PostAsJsonAsync($"{NavigationManager.BaseUri}calories", caloriesItem);
+                // var result = await response.Content.ReadFromJsonAsync<CaloriesModel>();
+            }
+            catch(Exception ex) {
+                ex.GetBaseException();
+                error = true;
+                errorMsg = "Couldn't add calories, something went wrong!";
+            }
+        }
+    }
+}

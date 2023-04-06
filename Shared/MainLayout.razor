@@ -1,0 +1,35 @@
+﻿@inherits LayoutComponentBase
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>Caltrack</PageTitle>
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <AuthorizeView>
+                <Authorized>
+                    <a href="/" @onclick="logout">Logout</a>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="/login">Login</a>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+@code {
+    private async Task logout() {
+        var customAuthStateProvider = (CustomAuthStateProvider)AuthStateProvider;
+        await customAuthStateProvider.UpdateAuthenticationState(null);
+        NavigationManager.NavigateTo("/");
+    }
+}

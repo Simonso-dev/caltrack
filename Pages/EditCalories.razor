@@ -1,0 +1,48 @@
+@page "/edit"
+@page "/edit/{caloriesId:int}"
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+
+    <PageTitle>Edit Calories entry</PageTitle>
+    <h3>Edit Calories entry (@calories.CaloriesId)</h3>
+
+    <EditForm Model="calories" OnSubmit="HandleUpdateSubmit" class="mb-4">
+        <label for="calories" class="form-label">Calories</label>
+        <InputNumber placeholder="Calories amount" id="calories" @bind-Value="calories.Calories" class="mb-2 form-control"/>
+        <label for="date" class="form-label">Date</label>
+        <InputDate @bind-Value="calories.Date" id="date" class="form-control mb-3"/>
+        <button type="submit"class=" btn btn-primary">Update calories</button> | <a href="/">Go home</a> | <a href="delete/@calories.CaloriesId">Delete</a>
+    </EditForm>
+
+@code {
+    [Parameter]
+    public int caloriesId { get; set;}
+
+    private CaloriesModel? calories = new();
+    private DateTime currDate = DateTime.Today;
+
+    private async Task HandleUpdateSubmit() {
+        await HttpClient.PutAsJsonAsync<CaloriesModel>(NavigationManager.BaseUri + $"calories/{caloriesId}", calories);
+        NavigationManager.NavigateTo("/");
+    }
+
+    protected override async Task OnParametersSetAsync() {
+        // if(caloriesId != null) {
+        try {
+            var result = await HttpClient.GetFromJsonAsync<CaloriesModel>(NavigationManager.BaseUri + $"calories/{caloriesId}");
+            if(result != null) {
+                calories = result;
+            }
+            else {
+                NavigationManager.NavigateTo("/");
+            }
+        }
+        catch(Exception ex) {
+            ex.GetBaseException();
+        }
+        // }
+    }
+}
+
+
+

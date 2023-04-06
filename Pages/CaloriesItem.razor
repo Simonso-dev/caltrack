@@ -1,0 +1,40 @@
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+<h4>Calories item</h4>
+
+    @if(calorie != null) {
+        <div>Calories: @calorie.Calories</div>
+        <div>Date: @calorie.Date.ToString("dd.MM.yyyy")</div>
+    }
+
+    @if(error) {
+        <div class="alert alert-danger" role="alert">@errorMsg</div>
+    }
+
+    <input placeholder="Calories ID" @bind="caloriesId">
+    <Button @onclick="getCalories">Get calories</Button>
+    <Button @onclick="removeCalories">Remove</Button>
+
+@code {
+    private int caloriesId;
+    private bool error = false;
+    private string? errorMsg;
+    private CaloriesModel? calorie;
+    private async Task getCalories() {
+        try {
+            calorie = await HttpClient.GetFromJsonAsync<CaloriesModel>(NavigationManager.BaseUri + $"calories/{caloriesId}");
+            error = false;
+        }
+        catch(Exception ex) {
+            ex.GetBaseException();
+            error = true;
+            errorMsg = "No calories item with the caloriesId: " + caloriesId;
+            calorie = null;
+        }
+    }
+    private void removeCalories() {
+        calorie = null;
+        error = false;
+    }
+}

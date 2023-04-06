@@ -1,0 +1,35 @@
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+
+<h4>Calories entries</h4>
+
+    @if(calories != null) {
+        <table class="mb-2 table">
+            <tr>
+                <th>Calories</th><th>Date</th>
+            </tr>
+        @foreach (var calorie in calories) {
+            <tr>
+                <td>@calorie.Calories</td>
+                <td>@calorie.Date.ToString("dd.MM.yyyy")</td>
+                <td>
+                    <a href="edit/@calorie.CaloriesId">Edit</a> | 
+                    <a href="delete/@calorie.CaloriesId">Delete</a>
+                </td>
+            </tr>
+        }
+        </table>
+    }
+
+@code {
+    private List<CaloriesModel> calories = new();
+    
+    protected override async Task OnInitializedAsync() {
+        var authState = (CustomAuthStateProvider)AuthStateProvider;
+        var authUser = await authState.GetAuthenticationStateAsync();
+        var user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{authUser.User.Identity.Name}");
+        calories = await HttpClient.GetFromJsonAsync<List<CaloriesModel>>(NavigationManager.BaseUri + "calories/byUser/" + user.UserId);
+    }
+    
+}

@@ -1,0 +1,30 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+<div class="container-fluid">
+<AuthorizeView>
+    <Authorized>
+        <h1>Hello, @context.User.Identity.Name</h1>
+    </Authorized>
+    <NotAuthorized>
+        <h1>Hello, Guest!</h1>
+    </NotAuthorized>
+</AuthorizeView>
+        <p>Welcome to Caltrack</p>
+    <AuthorizeView>
+        <Authorized>
+            <CaloriesList />
+            <InputCalories />
+        </Authorized>
+        <NotAuthorized>
+            <p>Please <a href="/login">Login</a> or <a href="/register">Register</a> to track caloric intake!</p>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; }
+    
+}
+
