@@ -1,0 +1,48 @@
+@page "/edituser"
+@page "/edituser/{UserId:int}"
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+@attribute [Authorize(Roles = "Administrator")]
+
+    <PageTitle>Edit user </PageTitle>
+    <h3>Edit User</h3>
+
+    <EditForm Model="user" OnSubmit="HandleUpdateSubmit" class="mb-4">
+        <label for="username" class="form-label">Username</label>
+        <InputText placeholder="Username" id="username" @bind-Value="user.Username" class="mb-2 form-control"/>
+        <label for="role" class="form-label">Role</label>
+        <InputText placeholder="Role" @bind-Value="user.Role" id="role" class="form-control mb-3"/>
+        <button type="submit"class=" btn btn-primary">Update user</button> | <a href="/useradmin">Go back</a> | <a href="deleteuser/@user.UserId">Delete</a>
+    </EditForm>
+
+@code {
+    [Parameter]
+    public int UserId { get; set; }
+
+    private User? user = new();
+
+    private async Task HandleUpdateSubmit() {
+        await HttpClient.PutAsJsonAsync<User>(NavigationManager.BaseUri + $"users/{UserId}", user);
+        NavigationManager.NavigateTo("/useradmin");
+    }
+
+    protected override async Task OnParametersSetAsync() {
+        // if(UserId != null) {
+        try {
+            var result = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{UserId}");
+            if(result != null) {
+                user = result;
+            }
+            else {
+                NavigationManager.NavigateTo("/useradmin");
+            }
+        }
+        catch(Exception ex) {
+            ex.GetBaseException();
+        }
+        // }
+    }
+}
+
+
+

@@ -1,0 +1,12 @@
+
+@if(error) {
+    <div class="alert alert-danger text-center" role="alert">@errorMsg</div>
+}
+
+@code {
+    [Parameter]
+    public bool error {get; set;}
+
+    [Parameter]
+    public string? errorMsg {get; set;}
+}

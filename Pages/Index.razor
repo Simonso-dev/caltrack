@@ -13,18 +13,11 @@
         <p>Welcome to Caltrack</p>
     <AuthorizeView>
         <Authorized>
-            <CaloriesList />
-            <InputCalories />
+            <Caltrack.Pages.Calories.CaloriesList />
+            <Caltrack.Pages.Calories.InputCalories />
         </Authorized>
         <NotAuthorized>
             <p>Please <a href="/login">Login</a> or <a href="/register">Register</a> to track caloric intake!</p>
         </NotAuthorized>
     </AuthorizeView>
 </div>
-
-@code {
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationState { get; set; }
-    
-}
-

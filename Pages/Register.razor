@@ -8,9 +8,7 @@
 
 <h3>Register</h3>
 
-    @if(error) {
-        <div class="alert alert-danger text-center" role="alert">@errorMsg</div>
-    }
+   <ErrorDialog error="error" errorMsg="@errorMsg" />
 
     <EditForm Model="registerUser" OnSubmit="HandleRegisterSubmit" class="mb-4">
         <label for="username" class="form-label">Username</label>

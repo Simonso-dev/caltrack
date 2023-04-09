@@ -9,9 +9,7 @@
 
 <h3>Login</h3>
 
-    @if(error) {
-        <div class="alert alert-danger text-center" role="alert">@errorMsg</div>
-    }
+   <ErrorDialog error="error" errorMsg="@errorMsg" />
 
     <EditForm Model="loginUser" OnSubmit="HandleLoginSubmit" class="mb-4">
         <label for="username" class="form-label">Username</label>

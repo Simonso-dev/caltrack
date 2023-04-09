@@ -54,6 +54,7 @@ public class UserController : Controller {
         }
 
         updateUser.Username = user.Username;
+        updateUser.Role = user.Role;
         await _db.SaveChangesAsync();
 
         return updateUser;

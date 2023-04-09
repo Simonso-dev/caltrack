@@ -1,0 +1,48 @@
+@page "/deleteuser"
+@page "/deleteuser/{UserId:int}"
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+@attribute [Authorize(Roles = "Administrator")]
+
+    <PageTitle>Delete User</PageTitle>
+    <h3>Delete User</h3>
+    <h5 class="mb-4">Are you sure you want to delete this user?</h5>
+
+    <table width="40%" class="mb-2">
+        <tr><th>Username</th><td>@user.Username</td></tr>
+        <tr><th>Role</th><td>@user.Role</td></tr>
+    </table>
+
+    <button @onclick="deleteUser" class="btn btn-danger">Delete</button> | <a href="/useradmin">Go back</a>
+
+@code {
+    [Parameter]
+    public int UserId { get; set; }
+
+    private User? user = new();
+
+    private async Task deleteUser() {
+        await HttpClient.DeleteFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{UserId}");
+        NavigationManager.NavigateTo("/useradmin");
+    }
+
+    protected override async Task OnParametersSetAsync() {
+        // if(UserId != null) {
+        try {
+            var result = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{UserId}");
+            if(result != null) {
+                user = result;
+            }
+            else {
+                NavigationManager.NavigateTo("/useradmin");
+            }
+        }
+        catch(Exception ex) {
+            ex.GetBaseException();
+        }
+        // }
+    }
+}
+
+
+

@@ -2,9 +2,7 @@
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthStateProvider
 
-@if(error) {
-    <div class="alert alert-danger" role="alert">@errorMsg</div>
-}
+<ErrorDialog error="error" errorMsg="@errorMsg"/>
 
 <EditForm Model="caloriesItem" OnValidSubmit="addCalories" class="row g-2">
     <div class="col-auto">
@@ -36,6 +34,7 @@
             try{ 
                 var response = await HttpClient.PostAsJsonAsync($"{NavigationManager.BaseUri}calories", caloriesItem);
                 // var result = await response.Content.ReadFromJsonAsync<CaloriesModel>();
+                NavigationManager.NavigateTo("/", true);
             }
             catch(Exception ex) {
                 ex.GetBaseException();

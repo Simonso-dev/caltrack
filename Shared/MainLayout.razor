@@ -30,6 +30,6 @@
     private async Task logout() {
         var customAuthStateProvider = (CustomAuthStateProvider)AuthStateProvider;
         await customAuthStateProvider.UpdateAuthenticationState(null);
-        NavigationManager.NavigateTo("/");
+        NavigationManager.NavigateTo("/", true);
     }
 }
