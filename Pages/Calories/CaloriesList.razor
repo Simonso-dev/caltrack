@@ -28,8 +28,8 @@
     protected override async Task OnInitializedAsync() {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var authUser = authState.User;
-        var user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{authUser.Identity.Name}");
-        calories = await HttpClient.GetFromJsonAsync<List<CaloriesModel>>(NavigationManager.BaseUri + "calories/byUser/" + user.UserId);
+        var user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"api/users/{authUser.Identity.Name}");
+        calories = await HttpClient.GetFromJsonAsync<List<CaloriesModel>>(NavigationManager.BaseUri + "api/calories/byUser/" + user.UserId);
     }
     
 }

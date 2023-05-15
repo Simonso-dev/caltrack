@@ -1,24 +1,32 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace caltrack.Data;
 
 [ApiController]
-[Route("users")]
+[Route("api/users")]
 public class UserController : Controller {
     private readonly CaltrackContext _db;
+    private readonly IConfiguration _configuration;
 
-    public UserController(CaltrackContext db) =>
+    public UserController(IConfiguration configuration, CaltrackContext db) {
         _db = db;
+       _configuration = configuration;
+    }
     
     // Read comments in CaloriesController.
-    [HttpGet]
+    [HttpGet, Authorize(Roles = "Administrator")]
     public async Task<ActionResult<List<User>>> GetAllUsers() =>
         await _db.Users.ToListAsync();
 
     [HttpGet("{UserId:int}")]
-    public async Task<ActionResult<User>> GetUser(int UserId) {
-        var user = await _db.Users.FindAsync(UserId);
+    public async Task<ActionResult<User>> GetUser(int userId) {
+        var user = await _db.Users.FindAsync(userId);
 
         if(user is null) 
             return NotFound();
@@ -44,7 +52,7 @@ public class UserController : Controller {
 
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
-        return CreatedAtAction(nameof(user), new {UserId = user.UserId}, user);
+        return Ok(user);
     }
 
     [HttpPut("{UserId:int}")]
@@ -72,5 +80,42 @@ public class UserController : Controller {
         await _db.SaveChangesAsync();
 
         return user;
+    }
+
+    [HttpPost("login")]
+    public async Task<ActionResult<User>> Login(User loginUser) {
+        var user = await _db.Users.Where(u => u.Username == loginUser.Username).FirstOrDefaultAsync<User>();
+
+        bool hashMatch = BCrypt.Net.BCrypt.Verify(loginUser.Password, user.Password);
+
+        if(user.Username != loginUser.Username || hashMatch == false)
+            return BadRequest("Wrong username or password!");
+
+        string token = CreateToken(user);
+
+        return Ok(token);
+    }
+    
+    public string CreateToken(User user) {
+        List<Claim> clamis = new List<Claim> {
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.Role, user.Role)
+        };
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+            _configuration.GetSection("Appsettings:Token").Value!
+        ));
+
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+        var token = new JwtSecurityToken(
+            claims: clamis,
+            expires: DateTime.Now.AddDays(1),
+            signingCredentials: creds
+        );
+
+        var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+        return jwt;
     }
 }

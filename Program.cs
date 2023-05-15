@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using caltrack.Authentication;
 using caltrack.Data;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Blazored.LocalStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +19,17 @@ builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddAuthenticationCore();
 builder.Services.AddControllers();
+builder.Services.AddAuthentication().AddJwtBearer(options => {
+    options.TokenValidationParameters = new TokenValidationParameters {
+        ValidateIssuerSigningKey = true,
+        ValidateAudience = false,
+        ValidateIssuer = false,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+            builder.Configuration.GetSection("Appsettings:Token").Value!))
+    };
+});
+builder.Services.AddAuthorization();
+builder.Services.AddBlazoredLocalStorage();
 
 var app = builder.Build();
 
@@ -27,6 +41,8 @@ if (!app.Environment.IsDevelopment()) {
 app.UseStaticFiles();
 
 app.UseRouting();
+// app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");

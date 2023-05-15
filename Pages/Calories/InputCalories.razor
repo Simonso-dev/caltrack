@@ -26,13 +26,13 @@
         } 
         else {
             var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-            var user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{authState.User.Identity.Name}");
+            var user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"api/users/{authState.User.Identity.Name}");
             
             caloriesItem.Date = date;
             caloriesItem.UserId = user.UserId;
 
             try{ 
-                var response = await HttpClient.PostAsJsonAsync($"{NavigationManager.BaseUri}calories", caloriesItem);
+                var response = await HttpClient.PostAsJsonAsync($"{NavigationManager.BaseUri}api/calories", caloriesItem);
                 // var result = await response.Content.ReadFromJsonAsync<CaloriesModel>();
                 NavigationManager.NavigateTo("/", true);
             }

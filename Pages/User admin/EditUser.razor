@@ -22,15 +22,15 @@
     private User? user = new();
 
     private async Task HandleUpdateSubmit() {
-        await HttpClient.PutAsJsonAsync<User>(NavigationManager.BaseUri + $"users/{UserId}", user);
+        await HttpClient.PutAsJsonAsync<User>(NavigationManager.BaseUri + $"api/users/{UserId}", user);
         NavigationManager.NavigateTo("/useradmin");
     }
 
     protected override async Task OnParametersSetAsync() {
         // if(UserId != null) {
         try {
-            var result = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{UserId}");
-            if(result != null) {
+            var result = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"api/users/{UserId}");
+            if(result is null) {
                 user = result;
             }
             else {

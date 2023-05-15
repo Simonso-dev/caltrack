@@ -1,6 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 <PageTitle>Caltrack</PageTitle>
 
@@ -28,6 +29,7 @@
 
 @code {
     private async Task logout() {
+        await LocalStorage.RemoveItemAsync("token");
         var customAuthStateProvider = (CustomAuthStateProvider)AuthStateProvider;
         await customAuthStateProvider.UpdateAuthenticationState(null);
         NavigationManager.NavigateTo("/", true);

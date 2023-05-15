@@ -39,7 +39,7 @@
             } */
             else {
                 registerUser.Role = "User";
-                var response = await HttpClient.PostAsJsonAsync($"{NavigationManager.BaseUri}users", registerUser);
+                var response = await HttpClient.PostAsJsonAsync($"{NavigationManager.BaseUri}api/users", registerUser);
 
                 var customAuthStateProvider = (CustomAuthStateProvider)AuthStateProvider;
                 await customAuthStateProvider.UpdateAuthenticationState(new UserSession {

@@ -23,7 +23,7 @@
     private CaloriesModel? calorie;
     private async Task getCalories() {
         try {
-            calorie = await HttpClient.GetFromJsonAsync<CaloriesModel>(NavigationManager.BaseUri + $"calories/{caloriesId}");
+            calorie = await HttpClient.GetFromJsonAsync<CaloriesModel>(NavigationManager.BaseUri + $"api/calories/{caloriesId}");
             error = false;
         }
         catch(Exception ex) {

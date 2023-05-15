@@ -23,15 +23,15 @@
     private CaloriesModel? calories = new();
 
     private async Task deleteCalories() {
-            await HttpClient.DeleteFromJsonAsync<CaloriesModel>(NavigationManager.BaseUri + $"calories/{caloriesId}");
+            await HttpClient.DeleteFromJsonAsync<CaloriesModel>(NavigationManager.BaseUri + $"api/calories/{caloriesId}");
             NavigationManager.NavigateTo("/");
     }
 
     protected override async Task OnParametersSetAsync() {
         // if(caloriesId != null) {
         try {
-            var result = await HttpClient.GetFromJsonAsync<CaloriesModel>(NavigationManager.BaseUri + $"calories/{caloriesId}");
-            if(result != null) {
+            var result = await HttpClient.GetFromJsonAsync<CaloriesModel>(NavigationManager.BaseUri + $"api/calories/{caloriesId}");
+            if(result is null) {
                 calories = result;
             }
             else {

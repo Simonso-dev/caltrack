@@ -22,15 +22,15 @@
     private DateTime currDate = DateTime.Today;
 
     private async Task HandleUpdateSubmit() {
-        await HttpClient.PutAsJsonAsync<CaloriesModel>(NavigationManager.BaseUri + $"calories/{caloriesId}", calories);
+        await HttpClient.PutAsJsonAsync<CaloriesModel>(NavigationManager.BaseUri + $"api/calories/{caloriesId}", calories);
         NavigationManager.NavigateTo("/");
     }
 
     protected override async Task OnParametersSetAsync() {
         // if(caloriesId != null) {
         try {
-            var result = await HttpClient.GetFromJsonAsync<CaloriesModel>(NavigationManager.BaseUri + $"calories/{caloriesId}");
-            if(result != null) {
+            var result = await HttpClient.GetFromJsonAsync<CaloriesModel>(NavigationManager.BaseUri + $"api/calories/{caloriesId}");
+            if(result is null) {
                 calories = result;
             }
             else {

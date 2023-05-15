@@ -1,9 +1,13 @@
 @layout LoginAndRegisterLayout 
 @page "/login"
 @using caltrack.Authentication;
+@using System.IdentityModel.Tokens.Jwt;
+@using Microsoft.AspNetCore.Authentication.Cookies;
+@using System.Security.Claims;
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
 @inject HttpClient HttpClient
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 <PageTitle>Login</PageTitle>
 
@@ -19,7 +23,6 @@
         <button type="submit" class="btn btn-primary w-100">Login</button> <p class="text-center mt-4">Not registerd? <a href="/register">Register</a></p>
     </EditForm>
 
-
 @code {
     private User loginUser = new();
     private string? errorMsg = "Wrong username or password!";
@@ -28,23 +31,43 @@
 
     private async Task HandleLoginSubmit() {
         try {
-            var userAccount = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{loginUser.Username}");
-            hashMatch = BCrypt.Verify(loginUser.Password, userAccount.Password);
-            if(userAccount is null || hashMatch == false) {
+            var response = await HttpClient.PostAsJsonAsync(NavigationManager.BaseUri + "api/users/login", loginUser);
+            
+            if(response.StatusCode.Equals(400)) 
                 error = true;
-                return;
-            }
+
+            var jwt = await response.Content.ReadAsStringAsync();
+            await LocalStorage.SetItemAsync("token", jwt);
+            var principal = ParseClaimsFromJwt(jwt);
+            var identity = (ClaimsIdentity)principal.Identity;
+
+            var name = identity.FindFirst(ClaimTypes.Name).Value;
+            var role = identity.FindFirst(ClaimTypes.Role).Value;
 
             var customAuthStateProvider = (CustomAuthStateProvider)AuthStateProvider;
             await customAuthStateProvider.UpdateAuthenticationState(new UserSession {
-                Username = userAccount.Username,
-                Role = userAccount.Role
+                Username = name,
+                Role = role,
             });
             NavigationManager.NavigateTo("/", true);
         }
         catch(Exception ex) {
             ex.GetBaseException();
             error = true;
-        }
+        } 
+    }
+
+    private static ClaimsPrincipal ParseClaimsFromJwt(string jwt) {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var token = tokenHandler.ReadJwtToken(jwt);
+
+        if(token is null)
+            return null;
+        
+        var claims = new ClaimsIdentity(token.Claims,
+            CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(claims);
+
+        return principal;
     }
 }

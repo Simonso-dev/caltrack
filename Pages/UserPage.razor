@@ -25,7 +25,7 @@
             try {
                 var authState = await AuthStateProvider.GetAuthenticationStateAsync();
                 var authUser = authState.User;
-                user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{authUser.Identity.Name}");
+                user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"api/users/{authUser.Identity.Name}");
             }
             catch(Exception ex) {
                 ex.GetBaseException();

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace caltrack.Data;
 
 [ApiController]
-[Route("calories")]
+[Route("api/calories")]
 public class CaloriesController : Controller {
     private readonly CaltrackContext _db;
 
@@ -22,9 +22,10 @@ public class CaloriesController : Controller {
     [HttpGet("{CaloriesId:int}")]
     public async Task<ActionResult<CaloriesModel>> GetCaloriesItem(int CaloriesId) {
         var calorie = await _db.Calories.FindAsync(CaloriesId);
-        if(calorie is null) {
+
+        if(calorie is null) 
             return NotFound();
-        }
+        
         return calorie;
     }
 
@@ -37,15 +38,15 @@ public class CaloriesController : Controller {
     public async Task<ActionResult<CaloriesModel>> AddCalories(CaloriesModel calories) {
         _db.Calories.Add(calories);
         await _db.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetCaloriesItem), new {CaloriesId = calories.CaloriesId}, calories);
+        return Ok(calories);
     }
 
     [HttpPut("{CaloriesId:int}")]
     public async Task<ActionResult<CaloriesModel>> UpdateCalories(CaloriesModel calories, int caloriesId) {
         var updateCalories = await _db.Calories.FindAsync(caloriesId);
-        if(updateCalories is null) {
+
+        if(updateCalories is null)
             return NotFound();
-        }
 
         updateCalories.Calories = calories.Calories;
         await _db.SaveChangesAsync();
@@ -56,9 +57,9 @@ public class CaloriesController : Controller {
     [HttpDelete("{CaloriesId:int}")]
     public async Task<ActionResult<CaloriesModel>> DeleteCalories(int caloriesId) {
         var calories = await _db.Calories.FindAsync(caloriesId);
-        if(calories is null) {
+
+        if(calories is null) 
             return NotFound();
-        }
 
         _db.Calories.Remove(calories);
         await _db.SaveChangesAsync();
