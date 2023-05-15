@@ -26,9 +26,9 @@
     private List<CaloriesModel> calories = new();
     
     protected override async Task OnInitializedAsync() {
-        var authState = (CustomAuthStateProvider)AuthStateProvider;
-        var authUser = await authState.GetAuthenticationStateAsync();
-        var user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{authUser.User.Identity.Name}");
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var authUser = authState.User;
+        var user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{authUser.Identity.Name}");
         calories = await HttpClient.GetFromJsonAsync<List<CaloriesModel>>(NavigationManager.BaseUri + "calories/byUser/" + user.UserId);
     }
     

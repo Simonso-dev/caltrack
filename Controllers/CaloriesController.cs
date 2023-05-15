@@ -14,16 +14,15 @@ public class CaloriesController : Controller {
     // This method/route shouldn't be used since it concers infomration security practicies.
     // That is because this route essentially exposes all data in the calories table. 
     [HttpGet]
-    public async Task<ActionResult<List<CaloriesModel>>> GetAllCalories() {
-        return await _db.Calories.ToListAsync();
-    }
+    public async Task<ActionResult<List<CaloriesModel>>> GetAllCalories() =>
+        await _db.Calories.ToListAsync();
 
     // Same as the method/route above can be said about this, although you need an ID here.
     // As long as you understand the ID pattern/data type you can query anything you want in the calories table.
     [HttpGet("{CaloriesId:int}")]
     public async Task<ActionResult<CaloriesModel>> GetCaloriesItem(int CaloriesId) {
         var calorie = await _db.Calories.FindAsync(CaloriesId);
-        if(calorie == null) {
+        if(calorie is null) {
             return NotFound();
         }
         return calorie;
@@ -44,7 +43,7 @@ public class CaloriesController : Controller {
     [HttpPut("{CaloriesId:int}")]
     public async Task<ActionResult<CaloriesModel>> UpdateCalories(CaloriesModel calories, int caloriesId) {
         var updateCalories = await _db.Calories.FindAsync(caloriesId);
-        if(updateCalories == null) {
+        if(updateCalories is null) {
             return NotFound();
         }
 
@@ -57,7 +56,7 @@ public class CaloriesController : Controller {
     [HttpDelete("{CaloriesId:int}")]
     public async Task<ActionResult<CaloriesModel>> DeleteCalories(int caloriesId) {
         var calories = await _db.Calories.FindAsync(caloriesId);
-        if(calories == null) {
+        if(calories is null) {
             return NotFound();
         }
 

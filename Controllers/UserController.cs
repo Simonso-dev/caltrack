@@ -13,25 +13,26 @@ public class UserController : Controller {
     
     // Read comments in CaloriesController.
     [HttpGet]
-    public async Task<ActionResult<List<User>>> GetAllUsers() {
-        return await _db.Users.ToListAsync();
-    }
+    public async Task<ActionResult<List<User>>> GetAllUsers() =>
+        await _db.Users.ToListAsync();
 
     [HttpGet("{UserId:int}")]
     public async Task<ActionResult<User>> GetUser(int UserId) {
         var user = await _db.Users.FindAsync(UserId);
-        if(user == null) {
+
+        if(user is null) 
             return NotFound();
-        }
+
         return user;
     }
 
     [HttpGet("{username}")]
     public async Task<ActionResult<User>> GetUserByUsername(string username) {
         var user = await _db.Users.Where(u => u.Username == username).FirstOrDefaultAsync<User>();
-        if(user == null) {
+        
+        if(user is null) 
             return NotFound();
-        }
+
         return user;
     }
 
@@ -49,9 +50,9 @@ public class UserController : Controller {
     [HttpPut("{UserId:int}")]
     public async Task<ActionResult<User>> UpdateUser(User user, int userId) {
         var updateUser = await _db.Users.FindAsync(userId);
-        if(updateUser == null) {
+
+        if(updateUser is null) 
             return NotFound();
-        }
 
         updateUser.Username = user.Username;
         updateUser.Role = user.Role;
@@ -63,9 +64,9 @@ public class UserController : Controller {
     [HttpDelete("{UserId:int}")]
     public async Task<ActionResult<User>> DeleteUser(int userId) {
         var user = await _db.Users.FindAsync(userId);
-        if(user == null) {
+        
+        if(user is null) 
             return NotFound();
-        }
 
         _db.Users.Remove(user);
         await _db.SaveChangesAsync();

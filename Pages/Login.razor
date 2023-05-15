@@ -22,24 +22,29 @@
 
 @code {
     private User loginUser = new();
-    private string? errorMsg;
+    private string? errorMsg = "Wrong username or password!";
     private bool error;
     private bool hashMatch;
 
     private async Task HandleLoginSubmit() {
-        var userAccount = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{loginUser.Username}");
-        hashMatch = BCrypt.Verify(loginUser.Password, userAccount.Password);
-        if(userAccount == null || hashMatch == false) {
-            errorMsg = "Wrong username or password!";
-            error = true;
-            return;
-        }
+        try {
+            var userAccount = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{loginUser.Username}");
+            hashMatch = BCrypt.Verify(loginUser.Password, userAccount.Password);
+            if(userAccount is null || hashMatch == false) {
+                error = true;
+                return;
+            }
 
-        var customAuthStateProvider = (CustomAuthStateProvider)AuthStateProvider;
-        await customAuthStateProvider.UpdateAuthenticationState(new UserSession {
-            Username = userAccount.Username,
-            Role = userAccount.Role
-        });
-        NavigationManager.NavigateTo("/", true);
+            var customAuthStateProvider = (CustomAuthStateProvider)AuthStateProvider;
+            await customAuthStateProvider.UpdateAuthenticationState(new UserSession {
+                Username = userAccount.Username,
+                Role = userAccount.Role
+            });
+            NavigationManager.NavigateTo("/", true);
+        }
+        catch(Exception ex) {
+            ex.GetBaseException();
+            error = true;
+        }
     }
 }

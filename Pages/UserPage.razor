@@ -3,7 +3,7 @@
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthStateProvider
 
-
+<PageTitle>User Page: @user.Username</PageTitle>
 <AuthorizeView>
     <Authorized>
         <h3>Hello, @context.User.Identity.Name</h3>
@@ -23,9 +23,9 @@
 
         protected override async Task OnInitializedAsync() {
             try {
-                var authState = (CustomAuthStateProvider)AuthStateProvider;
-                var authUser = await authState.GetAuthenticationStateAsync();
-                user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{authUser.User.Identity.Name}");
+                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                var authUser = authState.User;
+                user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{authUser.Identity.Name}");
             }
             catch(Exception ex) {
                 ex.GetBaseException();
