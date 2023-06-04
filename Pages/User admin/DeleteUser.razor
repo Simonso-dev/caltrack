@@ -1,8 +1,11 @@
+@using System.Net.Http.Headers;
 @page "/deleteuser"
 @page "/deleteuser/{UserId:int}"
 @inject NavigationManager NavigationManager
 @inject HttpClient HttpClient
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 @attribute [Authorize(Roles = "Administrator")]
+
 
     <PageTitle>Delete User</PageTitle>
     <h3>Delete User</h3>
@@ -29,8 +32,10 @@
     protected override async Task OnParametersSetAsync() {
         // if(UserId != null) {
         try {
+            var token = await LocalStorage.GetItemAsStringAsync("token");
+            HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
             var result = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"api/users/{UserId}");
-            if(result is null) {
+            if(result is not null) {
                 user = result;
             }
             else {

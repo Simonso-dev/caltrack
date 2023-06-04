@@ -29,7 +29,7 @@ public class CustomAuthStateProvider : AuthenticationStateProvider {
                 return await Task.FromResult(new AuthenticationState(_anonymous));
             }
 
-            // _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
+            _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
 
             var ClaimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim> {
                 new Claim(ClaimTypes.Name, userSession.Username),
@@ -47,8 +47,9 @@ public class CustomAuthStateProvider : AuthenticationStateProvider {
     public async Task UpdateAuthenticationState(UserSession userSession) {
         ClaimsPrincipal claimsPrincipal;
         string token = await _localStorage.GetItemAsStringAsync("token");
+        
         if(userSession is not null) {
-            _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
+            _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer" + token.Replace("\"", ""));
             await _sessionStorage.SetAsync("UserSession", userSession);
             claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim> {
                 new Claim(ClaimTypes.Name, userSession.Username),

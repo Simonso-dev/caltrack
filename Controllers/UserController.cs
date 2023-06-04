@@ -10,6 +10,7 @@ namespace caltrack.Data;
 
 [ApiController]
 [Route("api/users")]
+[Authorize(Roles = "Administrator")]
 public class UserController : Controller {
     private readonly CaltrackContext _db;
     private readonly IConfiguration _configuration;
@@ -19,12 +20,11 @@ public class UserController : Controller {
        _configuration = configuration;
     }
     
-    // Read comments in CaloriesController.
-    [HttpGet, Authorize(Roles = "Administrator")]
+    [HttpGet]
     public async Task<ActionResult<List<User>>> GetAllUsers() =>
         await _db.Users.ToListAsync();
 
-    [HttpGet("{UserId:int}")]
+    [HttpGet("{UserId:int}"), Authorize(Roles = "Administrator, User")]
     public async Task<ActionResult<User>> GetUser(int userId) {
         var user = await _db.Users.FindAsync(userId);
 
@@ -34,7 +34,7 @@ public class UserController : Controller {
         return user;
     }
 
-    [HttpGet("{username}")]
+    [HttpGet("{username}"), Authorize(Roles = "Administrator, User")]
     public async Task<ActionResult<User>> GetUserByUsername(string username) {
         var user = await _db.Users.Where(u => u.Username == username).FirstOrDefaultAsync<User>();
         
@@ -44,7 +44,7 @@ public class UserController : Controller {
         return user;
     }
 
-    [HttpPost]
+    [HttpPost("register"), AllowAnonymous]
     public async Task<ActionResult<User>> AddUser(User user) {
         // Hash the password and overwrite user.password with the hash
         string passwordHash = BCrypt.Net.BCrypt.HashPassword(user.Password);
@@ -82,7 +82,7 @@ public class UserController : Controller {
         return user;
     }
 
-    [HttpPost("login")]
+    [HttpPost("login"), AllowAnonymous]
     public async Task<ActionResult<User>> Login(User loginUser) {
         var user = await _db.Users.Where(u => u.Username == loginUser.Username).FirstOrDefaultAsync<User>();
 

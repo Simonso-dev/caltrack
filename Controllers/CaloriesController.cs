@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -5,20 +6,17 @@ namespace caltrack.Data;
 
 [ApiController]
 [Route("api/calories")]
+[Authorize(Roles = "Administrator, User")]
 public class CaloriesController : Controller {
     private readonly CaltrackContext _db;
 
     public CaloriesController(CaltrackContext db) =>
         _db = db;
     
-    // This method/route shouldn't be used since it concers infomration security practicies.
-    // That is because this route essentially exposes all data in the calories table. 
     [HttpGet]
     public async Task<ActionResult<List<CaloriesModel>>> GetAllCalories() =>
         await _db.Calories.ToListAsync();
 
-    // Same as the method/route above can be said about this, although you need an ID here.
-    // As long as you understand the ID pattern/data type you can query anything you want in the calories table.
     [HttpGet("{CaloriesId:int}")]
     public async Task<ActionResult<CaloriesModel>> GetCaloriesItem(int CaloriesId) {
         var calorie = await _db.Calories.FindAsync(CaloriesId);

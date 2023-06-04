@@ -1,6 +1,8 @@
+@using System.Net.Http.Headers;
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthStateProvider
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 <h4>Calories entries</h4>
 
@@ -28,6 +30,8 @@
     protected override async Task OnInitializedAsync() {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var authUser = authState.User;
+        var token = await LocalStorage.GetItemAsStringAsync("token");
+        HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
         var user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"api/users/{authUser.Identity.Name}");
         calories = await HttpClient.GetFromJsonAsync<List<CaloriesModel>>(NavigationManager.BaseUri + "api/calories/byUser/" + user.UserId);
     }

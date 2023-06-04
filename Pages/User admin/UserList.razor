@@ -27,6 +27,13 @@
     private List<User> users = new();
 
     protected override async Task OnInitializedAsync() {
-        users = await HttpClient.GetFromJsonAsync<List<User>>(NavigationManager.BaseUri + "api/users");
+        try {
+            var token = await LocalStorage.GetItemAsStringAsync("token");
+            HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
+            users = await HttpClient.GetFromJsonAsync<List<User>>(NavigationManager.BaseUri + "api/users");
+        }
+        catch(Exception ex) {
+            ex.GetBaseException();
+        }
     }
 }

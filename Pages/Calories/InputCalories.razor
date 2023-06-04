@@ -1,6 +1,8 @@
+@using System.Net.Http.Headers;
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthStateProvider
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 <ErrorDialog error="error" errorMsg="@errorMsg"/>
 
@@ -26,12 +28,14 @@
         } 
         else {
             var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var token = await LocalStorage.GetItemAsStringAsync("token");
+            HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", "")); 
             var user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"api/users/{authState.User.Identity.Name}");
             
             caloriesItem.Date = date;
             caloriesItem.UserId = user.UserId;
 
-            try{ 
+            try{
                 var response = await HttpClient.PostAsJsonAsync($"{NavigationManager.BaseUri}api/calories", caloriesItem);
                 // var result = await response.Content.ReadFromJsonAsync<CaloriesModel>();
                 NavigationManager.NavigateTo("/", true);

@@ -1,7 +1,9 @@
+@using System.Net.Http.Headers;
 @page "/delete"
 @page "/delete/{caloriesId:int}"
 @inject NavigationManager NavigationManager
 @inject HttpClient HttpClient
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
     <PageTitle>Delete Calories entry</PageTitle>
     <h3>Delete Calories entry (@calories.CaloriesId)</h3>
@@ -13,8 +15,6 @@
     </table>
 
     <button @onclick="deleteCalories" class="btn btn-danger">Delete</button> | <a href="/">Go home</a>
-
-
 
 @code {
     [Parameter]
@@ -30,8 +30,10 @@
     protected override async Task OnParametersSetAsync() {
         // if(caloriesId != null) {
         try {
+            var token = await LocalStorage.GetItemAsStringAsync("token");
+            HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", "")); 
             var result = await HttpClient.GetFromJsonAsync<CaloriesModel>(NavigationManager.BaseUri + $"api/calories/{caloriesId}");
-            if(result is null) {
+            if(result is not null) {
                 calories = result;
             }
             else {
@@ -44,6 +46,3 @@
         // }
     }
 }
-
-
-

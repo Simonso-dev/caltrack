@@ -1,7 +1,9 @@
+@using System.Net.Http.Headers;
 @page "/edituser"
 @page "/edituser/{UserId:int}"
 @inject NavigationManager NavigationManager
 @inject HttpClient HttpClient
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 @attribute [Authorize(Roles = "Administrator")]
 
     <PageTitle>Edit user </PageTitle>
@@ -29,8 +31,10 @@
     protected override async Task OnParametersSetAsync() {
         // if(UserId != null) {
         try {
+            var token = await LocalStorage.GetItemAsStringAsync("token");
+            HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
             var result = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"api/users/{UserId}");
-            if(result is null) {
+            if(result is not null) {
                 user = result;
             }
             else {
