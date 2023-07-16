@@ -6,6 +6,7 @@
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
     <PageTitle>Edit Calories entry</PageTitle>
+    <div class="container-lg">
     <h3>Edit Calories entry (@calories.CaloriesId)</h3>
 
     <EditForm Model="calories" OnSubmit="HandleUpdateSubmit" class="mb-4">
@@ -15,6 +16,7 @@
         <InputDate @bind-Value="calories.Date" id="date" class="form-control mb-3"/>
         <button type="submit"class=" btn btn-primary">Update calories</button> | <a href="/">Go home</a> | <a href="delete/@calories.CaloriesId">Delete</a>
     </EditForm>
+    </div>
 
 @code {
     [Parameter]

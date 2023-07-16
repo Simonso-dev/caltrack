@@ -10,7 +10,6 @@ namespace caltrack.Data;
 
 [ApiController]
 [Route("api/users")]
-[Authorize(Roles = "Administrator")]
 public class UserController : Controller {
     private readonly CaltrackContext _db;
     private readonly IConfiguration _configuration;
@@ -20,7 +19,7 @@ public class UserController : Controller {
        _configuration = configuration;
     }
     
-    [HttpGet]
+    [HttpGet, Authorize(Roles = "Administrator")]
     public async Task<ActionResult<List<User>>> GetAllUsers() =>
         await _db.Users.ToListAsync();
 
@@ -52,10 +51,13 @@ public class UserController : Controller {
 
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
-        return Ok(user);
+
+        string token = CreateToken(user);
+
+        return Ok(token);
     }
 
-    [HttpPut("{UserId:int}")]
+    [HttpPut("{UserId:int}"), Authorize(Roles = "Administrator")]
     public async Task<ActionResult<User>> UpdateUser(User user, int userId) {
         var updateUser = await _db.Users.FindAsync(userId);
 
@@ -69,7 +71,7 @@ public class UserController : Controller {
         return updateUser;
     }
 
-    [HttpDelete("{UserId:int}")]
+    [HttpDelete("{UserId:int}"), Authorize(Roles = "Administrator")]
     public async Task<ActionResult<User>> DeleteUser(int userId) {
         var user = await _db.Users.FindAsync(userId);
         

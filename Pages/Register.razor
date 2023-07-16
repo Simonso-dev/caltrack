@@ -1,8 +1,14 @@
 @layout LoginAndRegisterLayout
 @page "/register"
+@using System.IdentityModel.Tokens.Jwt;
+@using Microsoft.AspNetCore.Authentication.Cookies;
+@using System.Security.Claims;
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
 @inject HttpClient HttpClient
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject IUtilitiesService UtilitiesService 
+
 
 <PageTitle>Register</PageTitle>
 
@@ -28,23 +34,31 @@
 
     private async Task HandleRegisterSubmit() {
         try {
-            // var user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"users/{registerUser.Username}");
+            //var user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"api/users/{registerUser.Username}");
             if(!registerUser.Password.Equals(confirmPassword)) {
                 errorMsg = "Password doesn't match confirmed password";
                 error = true;
             }
-            /* else if(registerUser.Username.Equals(user.Username)) {
-                errorMsg = "This username is already taken";
+            /*else if(registerUser.Username.Equals(user.Username)) {
+                errorMsg = "This user already exists";
                 error = true;
             } */
             else {
                 registerUser.Role = "User";
                 var response = await HttpClient.PostAsJsonAsync($"{NavigationManager.BaseUri}api/users/register", registerUser);
 
+                var jwt = await response.Content.ReadAsStringAsync();
+                await LocalStorage.SetItemAsync("token", jwt);
+                var principal = UtilitiesService.ParseClaimsFromJwt(jwt);
+                var identity = (ClaimsIdentity)principal.Identity;
+
+                var name = identity.FindFirst(ClaimTypes.Name).Value;
+                var role = identity.FindFirst(ClaimTypes.Role).Value;
+                
                 var customAuthStateProvider = (CustomAuthStateProvider)AuthStateProvider;
                 await customAuthStateProvider.UpdateAuthenticationState(new UserSession {
-                    Username = registerUser.Username,
-                    Role = registerUser.Role
+                    Username = name,
+                    Role = role
                 });
                 NavigationManager.NavigateTo("/", true);
             }

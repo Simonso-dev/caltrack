@@ -8,6 +8,8 @@ public class User {
     public string Username { get; set; }
     public string Password { get; set; }
     public string? Role { get; set; }
+    public int DailyGoalCalories { get; set; }
+
 
     // Collection navigation property 
     // Collection that references many related entities

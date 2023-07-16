@@ -8,6 +8,7 @@
 @inject NavigationManager NavigationManager
 @inject HttpClient HttpClient
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject IUtilitiesService UtilitiesService
 
 <PageTitle>Login</PageTitle>
 
@@ -38,7 +39,7 @@
 
             var jwt = await response.Content.ReadAsStringAsync();
             await LocalStorage.SetItemAsync("token", jwt);
-            var principal = ParseClaimsFromJwt(jwt);
+            var principal = UtilitiesService.ParseClaimsFromJwt(jwt);
             var identity = (ClaimsIdentity)principal.Identity;
 
             var name = identity.FindFirst(ClaimTypes.Name).Value;
@@ -55,19 +56,5 @@
             ex.GetBaseException();
             error = true;
         } 
-    }
-
-    private static ClaimsPrincipal ParseClaimsFromJwt(string jwt) {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var token = tokenHandler.ReadJwtToken(jwt);
-
-        if(token is null)
-            return null;
-        
-        var claims = new ClaimsIdentity(token.Claims,
-            CookieAuthenticationDefaults.AuthenticationScheme);
-        var principal = new ClaimsPrincipal(claims);
-
-        return principal;
     }
 }

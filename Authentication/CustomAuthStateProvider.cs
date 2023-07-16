@@ -48,7 +48,7 @@ public class CustomAuthStateProvider : AuthenticationStateProvider {
         ClaimsPrincipal claimsPrincipal;
         string token = await _localStorage.GetItemAsStringAsync("token");
         
-        if(userSession is not null) {
+        if(userSession != null) {
             _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer" + token.Replace("\"", ""));
             await _sessionStorage.SetAsync("UserSession", userSession);
             claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim> {

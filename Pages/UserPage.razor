@@ -1,22 +1,35 @@
 @page "/user"
+@using System.Net.Http.Headers;
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthStateProvider
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 <PageTitle>User Page: @user.Username</PageTitle>
+<div class="container-lg">
 <AuthorizeView>
     <Authorized>
         <h3>Hello, @context.User.Identity.Name</h3>
         <h5 class="mb-4">Here you can see your user information</h5>
-        <table width="40%" class="mb-2">
+        <table width="40%" class="mb-4">
             <tr><th>Username</th><td>@user.Username</td></tr>
             <tr><th>Role</th><td>@user.Role</td></tr>
         </table>
+        @if(user.DailyGoalCalories == 0 || user.DailyGoalCalories == null) {
+            <div class="row border rounded p-2">
+                <h5>Your daily goal for caloric intake is @user.DailyGoalCalories, you should add a goal for your daily caloric intake to help you track your goal</h5>
+                <input class="form-control col m-1" placeholder="Set your daily goal caloric intake" /><button class="btn btn-success col m-1">Set</button>
+            </div>
+        }
+        else {
+            <p>Daily goal for caloric intake is @user.DailyGoalCalories</p>
+        }
     </Authorized>
     <NotAuthorized>
         <p>Please <a href="/login">Login</a> or <a href="/register">Register</a> to track caloric intake!</p>
     </NotAuthorized>
 </AuthorizeView>
+</div>
 
 @code {
         private User? user = new();
@@ -25,6 +38,8 @@
             try {
                 var authState = await AuthStateProvider.GetAuthenticationStateAsync();
                 var authUser = authState.User;
+                var token = await LocalStorage.GetItemAsStringAsync("token");
+                HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
                 user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"api/users/{authUser.Identity.Name}");
             }
             catch(Exception ex) {

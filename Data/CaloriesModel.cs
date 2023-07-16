@@ -8,6 +8,7 @@ public class CaloriesModel {
     public int CaloriesId { get; set; }
     public int Calories { get; set; }
     public DateTime Date { get; set; }
+    public int DailyGoalCalories { get; set; }
 
     // Foreign key
     public int UserId { get; set; }

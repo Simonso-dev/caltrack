@@ -7,6 +7,7 @@
 @attribute [Authorize(Roles = "Administrator")]
 
     <PageTitle>Edit user </PageTitle>
+    <div class="container-lg">
     <h3>Edit User</h3>
 
     <EditForm Model="user" OnSubmit="HandleUpdateSubmit" class="mb-4">
@@ -16,6 +17,7 @@
         <InputText placeholder="Role" @bind-Value="user.Role" id="role" class="form-control mb-3"/>
         <button type="submit"class=" btn btn-primary">Update user</button> | <a href="/useradmin">Go back</a> | <a href="deleteuser/@user.UserId">Delete</a>
     </EditForm>
+    </div>
 
 @code {
     [Parameter]

@@ -4,36 +4,83 @@
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 <h4>Users</h4>
+
+    <div class="mb-2 py-2 row">
+        <h5 class="">Search for users</h5>
+        <div class="input-group col">
+            <input class="form-control" placeholder="Search username" @bind-value="searchName"/>
+        </div>
+        <div class="dropdown col">
+            <select class="form-select" @bind="searchRole">
+                <option selected value="">Select a role</option>
+                <option value="User">User</option>
+                <option value="Administrator">Administrator</option>
+            </select>
+            <!-- <input class="form-control" placeholder="Search Role" @bind-value="searchRole"/> -->
+        </div>
+        <button class="btn btn-primary mx-2 col" @onclick="SearchUsers">Search</button>
+        <button class="btn btn-success mx-2 col" @onclick="Reset">Reset</button>
+    </div>
+
     @if(users != null) {
-        <table class="mb-2 table">
-            <tr>
-                <th>Username</th><th>Role</th><th>UserId</th>
-            </tr>
-        @foreach (var user in users) {
-            <tr>
-                <td>@user.Username</td>
-                <td>@user.Role</td>
-                <td>@user.UserId</td>
-                <td>
-                    <a href="edituser/@user.UserId">Edit</a> | 
-                    <a href="deleteuser/@user.UserId">Delete</a>
-                </td>
-            </tr>
-        }
+        <table class="mb-2 table table-striped table-bordered rounded rounded-3 overflow-hidden">
+            <thead class="table-info">
+                <tr>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>UserId</th>
+                    <th>Edit or Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+            @if(!searchedUsers.Any()) {
+                <tr>
+                    <td colspan="4" class="py-4 text-center fs-4">This user does not exsist</td> 
+                </tr>
+            }
+            @foreach (var user in searchedUsers) {
+                <tr>
+                    <td>@user.Username</td>
+                    <td>@user.Role</td>
+                    <td>@user.UserId</td>
+                    <td>
+                        <a href="edituser/@user.UserId">Edit</a> | 
+                        <a href="deleteuser/@user.UserId">Delete</a>
+                    </td>
+                </tr>
+            }
+            </tbody>
         </table>
     }
 
 @code {
     private List<User> users = new();
+    private List<User> searchedUsers = new();
+    private string searchName = string.Empty;
+    private string searchRole = string.Empty;
 
     protected override async Task OnInitializedAsync() {
         try {
             var token = await LocalStorage.GetItemAsStringAsync("token");
             HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Replace("\"", ""));
             users = await HttpClient.GetFromJsonAsync<List<User>>(NavigationManager.BaseUri + "api/users");
+            searchedUsers = users;
         }
         catch(Exception ex) {
             ex.GetBaseException();
         }
+    }
+
+    private void SearchUsers() {
+        if(!string.IsNullOrEmpty(searchName) || !string.IsNullOrEmpty(searchRole)) {
+            searchedUsers = users.Where(u => u.Username.ToLower().Contains(searchName.ToLower()))
+                .Where(u => u.Role.ToLower().Contains(searchRole.ToLower())).ToList();
+        }
+    }
+
+    private void Reset() {
+        searchedUsers = users;
+        searchName = string.Empty;
+        searchRole = string.Empty;
     }
 }

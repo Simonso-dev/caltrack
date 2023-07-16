@@ -17,6 +17,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddSqlite<CaltrackContext>("Data Source=caltrack.db");
 builder.Services.AddScoped<ProtectedSessionStorage>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
+builder.Services.AddScoped<IUtilitiesService, UtilitiesService>();
 builder.Services.AddAuthenticationCore();
 builder.Services.AddControllers();
 builder.Services.AddAuthentication().AddJwtBearer(options => {

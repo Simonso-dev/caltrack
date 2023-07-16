@@ -7,26 +7,32 @@
 <h4>Calories entries</h4>
 
     @if(calories != null) {
-        <table class="mb-2 table">
-            <tr>
-                <th>Calories</th><th>Date</th>
-            </tr>
-        @foreach (var calorie in calories) {
-            <tr>
-                <td>@calorie.Calories</td>
-                <td>@calorie.Date.ToString("dd.MM.yyyy")</td>
-                <td>
-                    <a href="edit/@calorie.CaloriesId">Edit</a> | 
-                    <a href="delete/@calorie.CaloriesId">Delete</a>
-                </td>
-            </tr>
-        }
+        <table class="mb-2 table table-striped table-bordered rounded rounded-3 overflow-hidden">
+            <thead class="table-info">
+                <tr>
+                    <th>Calories</th>
+                    <th>Date</th>
+                    <th>Edit or Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var calorie in calories) {
+                <tr>
+                    <td>@calorie.Calories</td>
+                    <td>@calorie.Date.ToString("dd.MM.yyyy")</td>
+                    <td>
+                        <a href="edit/@calorie.CaloriesId">Edit</a> | 
+                        <a href="delete/@calorie.CaloriesId">Delete</a>
+                    </td>
+                </tr>
+            }
+            </tbody>
         </table>
     }
 
 @code {
     private List<CaloriesModel> calories = new();
-    
+
     protected override async Task OnInitializedAsync() {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var authUser = authState.User;
@@ -35,5 +41,4 @@
         var user = await HttpClient.GetFromJsonAsync<User>(NavigationManager.BaseUri + $"api/users/{authUser.Identity.Name}");
         calories = await HttpClient.GetFromJsonAsync<List<CaloriesModel>>(NavigationManager.BaseUri + "api/calories/byUser/" + user.UserId);
     }
-    
 }
